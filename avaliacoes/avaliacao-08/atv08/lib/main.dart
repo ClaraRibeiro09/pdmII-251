@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'models/post.dart';
+import 'models/usuario.dart';
 import 'services/api_service.dart';
 
 void main() {
@@ -12,41 +12,41 @@ class MeuApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Posts do Blog',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const TelaPosts(),
+      title: 'Usuários API',
+      theme: ThemeData(primarySwatch: Colors.green),
+      home: const TelaUsuarios(),
     );
   }
 }
 
-class TelaPosts extends StatefulWidget {
-  const TelaPosts({super.key});
+class TelaUsuarios extends StatefulWidget {
+  const TelaUsuarios({super.key});
 
   @override
-  State<TelaPosts> createState() => _TelaPostsState();
+  State<TelaUsuarios> createState() => _TelaUsuariosState();
 }
 
-class _TelaPostsState extends State<TelaPosts> {
-  late Future<List<Post>> _postsFuture;
+class _TelaUsuariosState extends State<TelaUsuarios> {
+  late Future<List<Usuario>> _usuariosFuture;
 
   @override
   void initState() {
     super.initState();
-    _postsFuture = ApiService.buscarPosts();
+    _usuariosFuture = ApiService.buscarUsuarios();
   }
 
   Future<void> _recarregar() async {
     setState(() {
-      _postsFuture = ApiService.buscarPosts();
+      _usuariosFuture = ApiService.buscarUsuarios();
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Postagens do Blog')),
-      body: FutureBuilder<List<Post>>(
-        future: _postsFuture,
+      appBar: AppBar(title: const Text('Lista de Usuários')),
+      body: FutureBuilder<List<Usuario>>(
+        future: _usuariosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -57,7 +57,7 @@ class _TelaPostsState extends State<TelaPosts> {
                 children: [
                   const Icon(Icons.error_outline, size: 60, color: Colors.red),
                   const SizedBox(height: 16),
-                  Text('Erro ao carregar posts:\n${snapshot.error}'),
+                  Text('Erro ao carregar usuários:\n${snapshot.error}'),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: _recarregar,
@@ -67,25 +67,23 @@ class _TelaPostsState extends State<TelaPosts> {
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('Nenhum post encontrado.'));
+            return const Center(child: Text('Nenhum usuário encontrado.'));
           }
 
-          final posts = snapshot.data!;
+          final usuarios = snapshot.data!;
           return RefreshIndicator(
             onRefresh: _recarregar,
             child: ListView.builder(
-              itemCount: posts.length,
+              itemCount: usuarios.length,
               itemBuilder: (context, index) {
-                final post = posts[index];
+                final usuario = usuarios[index];
                 return Card(
                   margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   elevation: 2,
                   child: ListTile(
-                    title: Text(
-                      post.titulo,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    subtitle: Text(post.corpo),
+                    leading: CircleAvatar(child: Text(usuario.id.toString())),
+                    title: Text(usuario.nome),
+                    subtitle: Text(usuario.email),
                   ),
                 );
               },
